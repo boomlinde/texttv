@@ -1,0 +1,11 @@
+#!/bin/bash
+
+printf "\033c"
+texttv
+
+while true; do
+	read -ep "Page: " page
+	if [ "" = "$page" ]; then break; fi
+	printf "\033c"
+	texttv "$page"
+done

@@ -1,0 +1,71 @@
+#!/usr/bin/env python
+
+import json
+import sys
+import re
+import urllib2
+from HTMLParser import HTMLParser
+
+link = re.compile(r'<a [^>]+>|</a>')
+div = re.compile(r'<div [^>]+>|</div>')
+spanstop = re.compile(r'</[A-Za-z0-9]+>')
+span = re.compile(r'<[A-Za-z0-9]+ class="([^"]+)">')
+span2 = re.compile('<span class=\'([^"]+)\'>')
+
+attribcols = {
+    'Y': '33',   # yellow
+    'G': '32',   # green
+    'B': '34',   # blue
+    'C': '36',   # cyan
+    'W': '37',   # white
+    'R': '30',   # red
+    'bgY': '43', # yellow
+    'bgG': '42', # green
+    'bgB': '44', # blue
+    'bgC': '46', # cyan
+    'bgW': '47', # white
+    'bgR': '40', # red
+    'DH': '1',   # underline
+}
+
+def replacecol(page, attribl):
+    attribs = [x.strip() for x in attribl.split()]
+    o = ''
+    for attrib in attribs:
+        if attrib in attribcols:
+            o += '\x1b[' + attribcols[attrib] + 'm'
+    page = page.replace('<h1 class="' + attribl + '">', o)
+    page = page.replace('<span class="' + attribl + '">', o)
+    return page
+
+
+def display(page):
+    page = div.sub('', page)
+    page = link.sub('', page)
+    page = spanstop.sub('\x1b[40m\x1b[37m', page)
+    for x in span.findall(page):
+        page = replacecol(page, x)
+    page = span.sub('', page)
+    page = span2.sub('', page)
+    o = ''
+    for line in page.split('\n'):
+        o += '\x1b[40m\x1b[37m' + line + '\x1b[0m\n'
+    parser = HTMLParser()
+    o = parser.unescape(o)
+    sys.stdout.write(o[:-1] + '\x1b[0m')
+
+
+def getttx(pages):
+    url = "https://api.texttv.nu/api/get/" + pages + '?app=texttvpy'
+    data = json.load(urllib2.urlopen(url))
+    for page in data:
+        for subpage in page['content']:
+            display(subpage)
+
+
+if __name__ == '__main__':
+    if len(sys.argv) > 1:
+        for arg in sys.argv[1:]:
+            getttx(arg)
+    else:
+        getttx('100')
