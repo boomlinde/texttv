@@ -1,11 +1,15 @@
 #!/bin/bash
 
 printf "\033c"
-texttv
+texttv="texttv"
+if [ -z "$(command -v texttv)" ]; then
+	texttv="./texttv"
+fi
+$texttv
 
 while true; do
 	read -ep "Page: " page
 	if [ "" = "$page" ]; then break; fi
 	printf "\033c"
-	texttv "$page"
+	$texttv "$page"
 done
