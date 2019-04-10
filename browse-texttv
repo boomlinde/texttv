@@ -1,5 +1,6 @@
 #!/bin/bash
 
+page=100
 printf "\033c"
 texttv="texttv"
 if [ -z "$(command -v texttv)" ]; then
@@ -7,9 +8,30 @@ if [ -z "$(command -v texttv)" ]; then
 fi
 $texttv
 
+
 while true; do
-	read -ep "Page: " page
-	if [ "" = "$page" ]; then break; fi
+	read -ep "Page: " input
+
+
+        if [[ "" = $input ]]
+        then break;
+
+        elif [[ "n" = $input ]]     # if the letter 'n' is entered, set the input to the next page:
+        then
+            input=$(( $page + 1 ))
+
+        elif [[ "p" = $input ]]     # if the letter 'p' is entered, set the input to the previous page:
+        then
+            input=$(( $page - 1 ))
+        fi
+
+
+        if [[ 99 -lt $input ]] && [[ 1000 -gt $input ]] # check if input is a valid page
+        then
+            page=$input                                 # set the page if input is valid
+        fi
+
+
 	printf "\033c"
 	$texttv "$page"
 done
