@@ -1,10 +1,10 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 
 import json
 import sys
 import re
-import urllib2
-from HTMLParser import HTMLParser
+from urllib.request import urlopen
+import html
 
 link = re.compile(r'<a [^>]+>|</a>')
 div = re.compile(r'<div [^>]+>|</div>')
@@ -50,14 +50,14 @@ def display(page):
     o = ''
     for line in page.split('\n'):
         o += '\x1b[40m\x1b[37m' + line + '\x1b[0m\n'
-    parser = HTMLParser()
-    o = parser.unescape(o)
+    o = html.unescape(o)
     sys.stdout.write(o[:-1] + '\x1b[0m')
 
 
 def getttx(pages):
     url = "https://api.texttv.nu/api/get/" + pages + '?app=texttvpy'
-    data = json.load(urllib2.urlopen(url))
+    response = urlopen(url)
+    data = json.loads(response.read().decode('utf-8'))
     for page in data:
         for subpage in page['content']:
             display(subpage)
