@@ -38,8 +38,27 @@ def replacecol(page, attribl):
     # Replace the opening tag with the terminal color codes, ignoring inline styles
     page = re.sub(f'<span class="{attribl}"(?: style="[^"]*")?>', o, page)
     return page
+#
+# def display(page):
+#     page = div.sub('', page)
+#     page = link.sub('', page)
+#     page = spanstop.sub('\x1b[0m', page)  # Reset terminal color/style at each closing tag
+#     for match in span.findall(page):
+#         page = replacecol(page, match)
+#     page = span.sub('', page)  # Remove the processed span tags
+#     o = ''
+#     for line in page.split('\n'):
+#         o += '\x1b[0m' + line + '\x1b[0m\n'  # Reset styles at the start and end of each line to prevent color spill-over
+#     o = html.unescape(o)
+#     sys.stdout.write(o)
+#
+
 
 def display(page):
+    # Strip out specific style attributes from spans
+    # This regex now also captures and ignores the spans with specific style attributes
+    page = re.sub(r'<span style="display:inline-block;transform:scaleY\(2\);transform-origin:top;" class="([^"]+)">', '', page)
+    
     page = div.sub('', page)
     page = link.sub('', page)
     page = spanstop.sub('\x1b[0m', page)  # Reset terminal color/style at each closing tag
